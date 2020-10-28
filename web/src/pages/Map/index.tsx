@@ -7,6 +7,7 @@ import { Map, TileLayer } from 'react-leaflet';
 import './Map.scss'
 import 'leaflet/dist/leaflet.css'
 
+// Changed
 
 const OrphanMap = () => {
     return (
