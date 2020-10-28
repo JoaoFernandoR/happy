@@ -1,14 +1,24 @@
 import express from 'express'
+import path from 'path'
+import errorHandler from './errors/handler'
+import cors from 'cors'
+// Rotas
+import OrphanagesRoute from './routes/OrphanagesRoute'
+
+import './database/connection'
 
 const server = express()
 
-server.get('/', (request, response, next) => {
+server.use(cors())
+server.use(express.json())
+server.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
 
-    return response.status(200).json({
-        message: 'success'
-    })
+//Rotas
+server.use('/orphanages', OrphanagesRoute)
 
-})
-
+server.use(errorHandler)
 
 server.listen(3333, () => console.log('Conectado à porta 3333...'))
+
+
+
