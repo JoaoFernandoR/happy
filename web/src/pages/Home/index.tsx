@@ -20,7 +20,7 @@ const Home = () => {
                 <strong> São Carlos </strong>
                 <span> São Paulo </span>
             </div>
-            <Link to="/map">
+            <Link to="/map" className="floatIcon">
                 <BsFillCaretRightFill size="30px" color="rgba(0,0,0,0.4)"/>
             </Link>
         </div>
