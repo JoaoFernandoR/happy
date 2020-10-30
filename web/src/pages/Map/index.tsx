@@ -1,22 +1,47 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
-import Leaflet from 'leaflet'
-// CSS
-import './Map.scss'
-import 'leaflet/dist/leaflet.css'
 import { FaSmileBeam } from 'react-icons/fa'
 import { FiPlus, FiArrowRight} from 'react-icons/fi'
-import IconMap from '../../assets/heart.png'
+// CSS
+import './Map.scss'
+// Components
+import MapIcon from '../components/mapIcon'
+import api from '../../services/api';
 
-const mapIcon = Leaflet.icon({
-    iconUrl: IconMap,
-    iconAnchor: [29, 68],
-    iconSize: [45, 45],
-    popupAnchor: [135, 1]
-})
+interface Orphanage {
+    id: number;
+    latitude: number;
+    longitude: number;
+    name: string;
+}
+
 
 const OrphanMap = () => {
+
+    const [data, setData] = useState<Orphanage[]>([])
+
+    useEffect( () => {
+            api.get('orphanages').then((result) => setData(result.data.data))
+            .catch((err) => console.log(err.error))
+    }, [])
+
+    const renderMarkers = () => {
+        return (
+            data.map((item, index) => {
+            return (
+            <Marker position={[item.latitude, item.longitude]} icon={MapIcon} key={index}>
+                <Popup closeButton={false} minWidth={180} maxWidth={180} className="map-popup">
+                    {item.name}
+                    <Link to={`/orphanages/${item.id}`}>
+                        <FiArrowRight size={20} color="#FFF"/>
+                    </Link>
+                </Popup>
+            </Marker>
+            )
+            })
+        )
+    }
 
     return (
     <section id="map">
@@ -29,20 +54,13 @@ const OrphanMap = () => {
                 <span> São Paulo </span>
             </div>
         </div>
-        <Map center={[-25.0929328, -50.1351359]} zoom={17} className="mapa" attributionControl={false}>
+        <Map center={[-22.0246281, -47.8939987]} zoom={17} className="mapa" attributionControl={false}>
             <TileLayer
             url={`https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}@2x?access_token=${process.env.REACT_APP_MAPBOX_TOKEN}`}
             />
-            <Marker position={[-25.0929036, -50.1352693]} icon={mapIcon}>
-                <Popup closeButton={false} minWidth={180} maxWidth={180} className="map-popup">
-                    Aonde mora meu mozão
-                    {/* <Link to="/">
-                        <FiArrowRight size={20} color="#FFF"/>
-                    </Link> */}
-                </Popup>
-            </Marker>
+            {renderMarkers()}
         </Map>  
-        <Link to='/' className="floatIcon">
+        <Link to='/orphanages/create' className="floatIcon">
             <FiPlus size="30px" color="rgba(0,0,0,0.4)" />
         </Link>
     </section>

@@ -8,6 +8,11 @@ export const createOrphanage = async (request:Request, response:Response, next:N
     try {
         const {name, latitude, longitude, about, instructions, opening_hours, open_on_weekends} = request.body
     
+        const requestImages = request.files as Express.Multer.File[]
+        const images = requestImages.map(image => {
+            return { path: image.filename}
+          })
+          
         const schema = Yup.object().shape({
             name: Yup.string().required('Nome obrigatório'),
             latitude: Yup.number().required(),
@@ -22,28 +27,24 @@ export const createOrphanage = async (request:Request, response:Response, next:N
               })
             ).required().min(1),
           });
+          
+          const orphanageRepository = getRepository(Orphanage)  
+          
+          const orphanage = orphanageRepository.create({ 
+              name, 
+              latitude, 
+              longitude, 
+              about, 
+              instructions, 
+              opening_hours, 
+              open_on_weekends: open_on_weekends === 'true',
+              images
+            })
+            
+            await schema.validate(orphanage, {abortEarly: false})
+            
+            await orphanageRepository.save(orphanage)
 
-        await schema.validate(request.body, {abortEarly: false})
-
-        const orphanageRepository = getRepository(Orphanage)  
-
-        const requestImages = request.files as Express.Multer.File[]
-        const images = requestImages.map(image => {
-            return { path: image.filename}
-        })
-    
-        const orphanage = orphanageRepository.create({ 
-            name, 
-            latitude, 
-            longitude, 
-            about, 
-            instructions, 
-            opening_hours, 
-            open_on_weekends,
-            images
-        })
-    
-        await orphanageRepository.save(orphanage)
     
         return response.status(201).json({
             status: 'success',
